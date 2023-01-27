@@ -81,4 +81,201 @@ async function loadProducts() {
   });
 }
 
-loadProducts();
+ /*   ***************************************************************       */
+//loadProducts();
+
+async function ex1() {
+  const query = qs.stringify(
+  {
+
+      sort :'name:asc'
+  },
+   
+  {
+    encodeValuesOnly: true,
+  });
+  console.log("The query string", query);
+
+  // call the matching endpoint and include the querystring after the ?
+  const baseUrl = "http://localhost:1337/api/products";
+  const response = await fetch(`${baseUrl}?${query}`);
+  const result = await response.json();
+  console.log(result.data.map(product => `${product.attributes.name} ${product.attributes.price}€`).join("\n"));
+}
+
+// ex1();
+
+
+/*   ***************************************************************       */
+
+async function example1() {
+  const query = qs.stringify(
+    {
+      /** here we can include all query parameter fields that we want to pass and their values */
+      // we provide which fields we want to select
+    fields: ['name', 'price'],
+    // we add filters
+    filters: {
+      price: {
+        $lte: 40,
+        $gte: 15
+      }
+    },
+    // we define the ordering
+    sort: ['price:asc']
+  }, {
+    encodeValuesOnly: true,
+  });
+  console.log("The querystring", query);
+
+  // call the matching endpoint and include the querystring after the ?
+  const response = await fetch(`http://localhost:1337/api/products?${query}`);
+  const result = await response.json();
+  // from here on we can use the result from the server in our javascript code
+  console.log(result.data.map(product => `${product.attributes.name} ${product.attributes.price}€`).join("\n"));
+}
+// example1();
+
+
+
+/*   ***************************************************************       */
+
+
+ async function searchProductByName(nameStr) {
+   const query = qs.stringify(
+   {
+       filters:{
+         name:{
+           $containsi:nameStr
+         }
+       },
+   }, 
+   {
+     encodeValuesOnly: true,
+   });
+   console.log("The query string", query);
+ 
+   // call the matching endpoint and include the querystring after the ?
+   const baseUrl = "http://localhost:1337/api/products";
+   const response = await fetch(`${baseUrl}?${query}`);
+   const result = await response.json();
+   return result.data.map((product) => `${product.attributes.name}`).join("\n");
+  }
+ async function test() {
+  console.log("Products containing name", await searchProductByName("name"));
+  console.log("Products containing prog", await searchProductByName("prog"));
+  console.log("Products containing pro", await searchProductByName("pro"));
+ }
+
+ //test();
+
+
+ /*   ***************************************************************       */
+
+ async function ex4() {
+  const query = qs.stringify(
+  {
+   fields: ["price"],
+  }, 
+  
+
+  {
+    encodeValuesOnly: true,
+  });
+  console.log("The query string", query);
+
+  // call the matching endpoint and include the querystring after the ?
+  const baseUrl = "http://localhost:1337/api/products";
+  const response = await fetch(`${baseUrl}?${query}`);
+  const result = await response.json();
+console.log(result);
+  
+  let sum = 0;
+  for(const obj of result.data ){
+    sum += obj.attributes.price ;
+  }
+  console.log(sum);
+
+}
+//ex4();
+
+/*   ***************************************************************       */
+
+// async function ex4() {
+//   const query = qs.stringify(
+//   {
+//     fields: ["price", "outOfStock"],
+//    filters: {
+
+//        outOfStock: {
+        
+//            $eq: false,
+//        },
+//      },
+//    },
+
+  
+//   {
+//     encodeValuesOnly: true,
+//   });
+//   console.log("The query string", query);
+
+//   // call the matching endpoint and include the querystring after the ?
+//   const baseUrl = "http://localhost:1337/api/products";
+//   const response = await fetch(`${baseUrl}?${query}`);
+//   const result = await response.json();
+//   //console.log(result.data.map(product => `${product.attributes.name} ${product.attributes.price}€`).join("\n"));
+//   console.log(result);
+//   let sum = 0;
+//  for (const obj of result.data) {
+//    sum += obj.attributes.price;
+//  }
+//  console.log(sum);
+ 
+//  }
+// //ex4();
+
+/*   ***************************************************************       */
+
+
+
+async function ex6() {
+  const query = qs.stringify(
+  {
+     populate: ["discount"],
+    fields: ["name", "price" , "outOfStock"],
+    filters: {
+      outOfStock: {
+        $eq: false,
+    },
+
+    }
+ }, 
+ {
+   encodeValuesOnly: true,
+ });
+ console.log("The query string", query);
+
+ // call the matching endpoint and include the querystring after the ?
+ const baseUrl = "http://localhost:1337/api/products";
+ const response = await fetch(`${baseUrl}?${query}`);
+ const result = await response.json();
+ 
+ let sum = 0;
+for (const obj of result.data) {
+
+  if(obj.attributes.discount.data !== null){
+    sum += obj.attributes.price * (1 - obj.attributes.discount.data.attributes.percentage / 100);
+  }
+  else{
+    sum += obj.attributes.price;
+  }
+}
+
+console.log(sum);
+
+
+}
+ex6();
+
+
